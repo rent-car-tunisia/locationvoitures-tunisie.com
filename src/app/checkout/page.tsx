@@ -143,7 +143,10 @@ function CheckoutContent() {
 
     const totalDays = calculateDays();
     const pricePerDay = car?.price || 108;
-    const carTotal = pricePerDay * totalDays;
+    const carTotalBeforeDiscount = pricePerDay * totalDays;
+    const discountPct = totalDays >= 30 ? 15 : totalDays >= 7 ? 8 : 0;
+    const discountAmount = Math.round(carTotalBeforeDiscount * discountPct / 100);
+    const carTotal = carTotalBeforeDiscount - discountAmount;
 
     // Calculate upsells total
     const upsellsTotal = selectedUpsells.reduce((total, upsellId) => {
@@ -533,8 +536,14 @@ function CheckoutContent() {
                             <div className="space-y-3 mb-4">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">{car?.title} x {totalDays} jours</span>
-                                    <span className="font-medium">{convert(carTotal)} {symbol}</span>
+                                    <span className="font-medium">{convert(carTotalBeforeDiscount)} {symbol}</span>
                                 </div>
+                                {discountPct > 0 && (
+                                    <div className="flex justify-between text-sm text-green-600">
+                                        <span>Remise {discountPct >= 15 ? 'mensuelle' : 'hebdomadaire'} -{discountPct}%</span>
+                                        <span className="font-medium">-{convert(discountAmount)} {symbol}</span>
+                                    </div>
+                                )}
                                 {selectedUpsells.map(upsellId => {
                                     const upsell = upsellOptions.find(u => u.id === upsellId);
                                     if (!upsell) return null;
